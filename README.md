@@ -1,3 +1,3 @@
 # NFTIZ
 
-Figma plugin that enables you to mint NFTs directly from Figma
+Figma plugin which enables you to mint NFTs directly from Figma
