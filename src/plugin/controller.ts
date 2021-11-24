@@ -1,4 +1,5 @@
 figma.showUI(__html__);
+figma.ui.resize(300,360);
 
 figma.ui.onmessage = (msg) => {
     if (msg.type === 'run_app') {

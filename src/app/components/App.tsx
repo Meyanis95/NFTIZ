@@ -27,7 +27,7 @@ const App = ({}) => {
                     <label>
                         Name: <input id="form_input" type="text" value={name} onChange={(e) => SetName(e.target.value)} />
 
-                        Description: <input id="form_input" type="description" value={desc} onChange={(e) => SetDesc(e.target.value)} />
+                        Description: <input id="form_input" type="textarea" value={desc} onChange={(e) => SetDesc(e.target.value)} />
 
                         Address: <input id="form_input" type="Address" value={address} onChange={(e) => SetAddress(e.target.value)} />
                     </label>
@@ -66,12 +66,12 @@ const App = ({}) => {
                 }
 
                 // Here we call the NFTPort API to mint the image as an NFT
-                async function mint(url_to_pass, name, desc, address) {
+                async function mint(ipfs_url, name, desc, address) {
                     const data = JSON.stringify({
                         chain: 'rinkeby',
                         name: name,
                         description: desc,
-                        file_url: url_to_pass,
+                        file_url: ipfs_url,
                         mint_to_address: address,
                     });
 
@@ -85,6 +85,9 @@ const App = ({}) => {
                     })
                         .then((response) => {
                             return response.json().then(function (json) {
+                                if (json.response ===  'OK') {
+                                    console.log('NFT minted!')
+                                }
                                 console.log('Status:', json.response);
                                 console.log('Transaction hash:', json.transaction_hash);
                                 console.log('Transaction url:', json.transaction_external_url);
@@ -100,8 +103,8 @@ const App = ({}) => {
                     const ipfs_url = await main();
                     mint(ipfs_url, name, desc, address);
                 }
-
                 run();
+                
             }
         };
     }, []);
@@ -109,7 +112,8 @@ const App = ({}) => {
     return (
         <div>
             <img src={require('../assets/logo.png')} />
-            <h2>NFTIZ Plugin</h2>
+            <h2>Welcome to NFTIZ!</h2>
+            <p>To mint a NFT, you need first to select a Frame and then fulfil information needed</p>
             <MyForm />
         </div>
     );
