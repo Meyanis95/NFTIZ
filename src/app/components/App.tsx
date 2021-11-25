@@ -65,6 +65,32 @@ const App = ({}) => {
                     return result;
                 }
 
+                async function upload_meta(name, desc, ipfs_url) {
+                    var url = 'https://api.nftport.xyz/v0/metadata';
+                    const data_up = JSON.stringify({
+                        chain: 'rinkeby',
+                        name: name,
+                        description: desc,
+                        file_url: ipfs_url,
+                    });
+
+                    const result_up = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: process.env.NFTPORT_KEY,
+                            'Content-Type': 'application/json',
+                        },
+                        body: data_up,
+                    }).then((response) => {
+                        return response.json().then(function (json) {
+                            console.log('upload results',json);
+                            return json.metadata_uri;
+                        });
+                    });
+
+                    return result_up;
+                }
+
                 // Here we call the NFTPort API to mint the image as an NFT
                 async function mint(ipfs_url, name, desc, address) {
                     const data = JSON.stringify({
@@ -99,9 +125,44 @@ const App = ({}) => {
                         });
                 }
 
+                async function mint_with_meta(metadata, address) {
+                    const data = JSON.stringify({
+                        chain: 'rinkeby',
+                        contract_address: '0xE5901EC65DC830e54b98Ff6097afA70eD2Ab4169',
+                        metadata_uri: metadata,
+                        mint_to_address: address,
+                    });
+
+                    fetch('https://api.nftport.xyz/v0/mints/customizable', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: process.env.NFTPORT_KEY,
+                        },
+                        body: data,
+                    })
+                        .then((response) => {
+                            return response.json().then(function (json) {
+                                if (json.response ===  'OK') {
+                                    console.log('NFT minted!')
+                                }
+                                console.log('Status:', json.response);
+                                console.log('Transaction hash:', json.transaction_hash);
+                                console.log('Transaction url:', json.transaction_external_url);
+                                console.log(response);
+                            });
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                        });
+                }
+
                 async function run() {
                     const ipfs_url = await main();
+                    //const testou = await upload_meta(name, desc, ipfs_url);
+                    //console.log(testou)
                     mint(ipfs_url, name, desc, address);
+                    //mint_with_meta(testou, address)
                 }
                 run();
                 
