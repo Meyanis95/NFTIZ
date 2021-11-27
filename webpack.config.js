@@ -10,7 +10,8 @@ module.exports = (env, argv) => ({
   devtool: argv.mode === 'production' ? false : 'inline-source-map',
 
   entry: {
-    ui: './src/app/index.tsx', // The entry point for your UI code
+    ui: './src/app/index.tsx',
+    ui_second: './src/app/loader.tsx', // The entry point for your UI code
     code: './src/plugin/controller.ts', // The entry point for your plugin code
   },
 
@@ -23,7 +24,9 @@ module.exports = (env, argv) => ({
       { test: /\.css$/, use: ['style-loader', { loader: 'css-loader' }] },
 
       // Allows you to use "<%= require('./file.svg') %>" in your HTML code to get a data URI
-      { test: /\.(png|jpg|gif|webp|svg)$/, loader: 'url-loader' },
+      { test: /\.(png|jpg|woff|ttf|2gif|webp|svg)$/, loader: 'url-loader' },
+
+      // { test: /\.(eot|woff|woff2|ttf)$/, loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'},
     ],
   },
 
@@ -43,6 +46,12 @@ module.exports = (env, argv) => ({
       filename: 'ui.html',
       inlineSource: '.(js)$',
       chunks: ['ui'],
+    }),
+    new HtmlWebpackPlugin({
+      template: './src/app/loader.html',
+      filename: 'ui_second.html',
+      inlineSource: '.(js)$',
+      chunks: ['ui_second'],
     }),
     new HtmlWebpackInlineSourcePlugin(),
   ],
