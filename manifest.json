@@ -1,11 +1,10 @@
 {
   "name": "NFTIZ",
-  "id": "00000000",
+  "id": "1047579004421824566",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": {"main":"dist/ui.html", "ui_second":"dist/ui_second.html"},
   "editorType": [
-    "figma",
-    "figjam"
+    "figma"
   ]
 }

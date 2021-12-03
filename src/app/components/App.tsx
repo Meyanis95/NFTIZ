@@ -13,8 +13,9 @@ const App = ({}) => {
 
         const handleSubmit = (event) => {
             event.preventDefault();
-            console.log("Parameters:",name, desc, address);
-            parent.postMessage({pluginMessage: {type: 'run_app', name, desc, address}}, '*');
+            if (name !== '' && desc !== '' && address !== '') {
+                parent.postMessage({pluginMessage: {type: 'run_app', name, desc, address}}, '*');
+            }
         };
 
         const onCancel = () => {
@@ -26,14 +27,16 @@ const App = ({}) => {
                 <form>
                     <div id="form_style">
                         <label>
-                            Name: <input id="form_input_name" type="text" value={name} onChange={(e) => SetName(e.target.value)} />
-
-                            Description: <textarea id="form_input_desc" rows={3} value={desc} onChange={(e) => SetDesc(e.target.value)} />
-
-                            Ethereum address: <input id="form_input_add" type="Address" value={address} onChange={(e) => SetAddress(e.target.value)} />
+                            Name*: <input id="form_input_name" type="text" value={name} onChange={(e) => SetName(e.target.value)} required/>
+                        </label>
+                        <label>
+                            Description*: <textarea id="form_input_desc" rows={3} value={desc} onChange={(e) => SetDesc(e.target.value)} required/>
+                        </label>
+                        <label>
+                            Ethereum address*: <input id="form_input_add" type="text" value={address} onChange={(e) => SetAddress(e.target.value)} required/>
                         </label>
                     </div>
-                    <button id="mint_button" onClick={handleSubmit}>Mint</button>
+                    <button type="submit" id="mint_button" onClick={handleSubmit}>Mint</button>
                     <button id="close_button" onClick={onCancel}>Cancel</button>
                 </form>
             </div>
