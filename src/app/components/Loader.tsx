@@ -7,10 +7,15 @@ const Loader = ({}) => {
   const [ipfsUrl, SetIpfsUrl] = useState('');
   const [externalUrl, SetExternalUrl] = useState('');
   const [isLoading, SetIsLoading] = useState(true);
+  const [isError, SetIsError] = useState(false);
+  const [errorType, SetErrorType] = useState('')
 
   function Spinner() {
     return (
-      <div id="spinner"></div>
+      <div id="spinnerHolder">
+        <div id="spinner"></div>
+        <h2>Minting ...</h2>
+      </div>
     )
   }
 
@@ -34,9 +39,11 @@ const Loader = ({}) => {
                 console.log('IPFS url: ', 'https://ipfs.io/ipfs/' + json.value.cid.toString());
                 SetIpfsUrl('https://ipfs.io/ipfs/' + json.value.cid.toString());
                 return 'https://ipfs.io/ipfs/' + json.value.cid.toString();
-            });
+            })
+          .catch(error => {
+            throw(error)
+          })
         });
-  
         return result;
       }
       
@@ -67,8 +74,8 @@ const Loader = ({}) => {
 
       async function mint_with_meta(metadata, address) {
         const data = JSON.stringify({
-            chain: 'rinkeby',
-            contract_address: '0xE5901EC65DC830e54b98Ff6097afA70eD2Ab4169',
+            chain: 'polygon',
+            contract_address: '0x7fc96cEC611171F27C233f70128D04dd66c7A8c8',
             metadata_uri: metadata,
             mint_to_address: address,
         });
@@ -85,17 +92,22 @@ const Loader = ({}) => {
                 return response.json().then(function (json) {
                     if (json.response ===  'OK') {
                         console.log('NFT minted!')
-                        SetIsLoading(false);
+                        SetIsLoading(false)
+                        console.log('Status:', json.response);
+                        console.log('Transaction hash:', json.transaction_hash);
+                        console.log('Transaction url:', json.transaction_external_url);
+                        SetExternalUrl(json.transaction_external_url);
+                        console.log(response);
                     }
-                    console.log('Status:', json.response);
-                    console.log('Transaction hash:', json.transaction_hash);
-                    console.log('Transaction url:', json.transaction_external_url);
-                    SetExternalUrl(json.transaction_external_url);
-                    console.log(response);
+                    else if (json.response === 'NOK') {
+                      SetIsLoading(false)
+                      SetIsError(true)
+                      SetErrorType(json.error)
+                    }
                 });
             })
             .catch((err) => {
-                console.error(err);
+                throw(err);
             });
       }
 
@@ -108,12 +120,8 @@ const Loader = ({}) => {
     }
   }
 
-  return (
-    <div>
-      <div>
-        <div className="v2_25"></div>
-      </div>
-      {isLoading ? <Spinner /> :
+  function RenderSuccess() {
+    return (
       <div>
       <h3 className="v2_26">NFT MINTED ✅</h3>
       <ul className="fullclick">
@@ -133,7 +141,31 @@ const Loader = ({}) => {
           </form>
         </li>
       </ul>
-      </div>}
+      </div>
+    )
+  }
+
+  function RenderError() {
+    return (
+      <div>
+        <div>
+            <h3 className="v2_26">Oups it seems that it's not working... </h3>
+        </div>
+        <div>
+          <span id="result_error" >Error: {errorType}</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div>
+        <div className="v2_25"></div>
+      </div>
+      {isLoading ? <Spinner /> : 
+      [(isError ? <RenderError /> : <RenderSuccess />)]
+      }
     </div>
   )
 }
