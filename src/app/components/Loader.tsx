@@ -8,7 +8,9 @@ const Loader = ({}) => {
   const [externalUrl, SetExternalUrl] = useState('');
   const [isLoading, SetIsLoading] = useState(true);
   const [isError, SetIsError] = useState(false);
-  const [errorType, SetErrorType] = useState('')
+  const [errorType, SetErrorType] = useState('');
+  const [txHash, setTxHash] = useState('');
+  const [oSLink, setOSLink] = useState('https://opensea.io/');
 
   function Spinner() {
     return (
@@ -72,10 +74,10 @@ const Loader = ({}) => {
         return result_up;
       }
 
-      async function mint_with_meta(metadata, address) {
+      function mint_with_meta(metadata, address) {
         const data = JSON.stringify({
-            chain: 'polygon',
-            contract_address: '0x7fc96cEC611171F27C233f70128D04dd66c7A8c8',
+            chain: 'rinkeby',
+            contract_address: '0xE5901EC65DC830e54b98Ff6097afA70eD2Ab4169',
             metadata_uri: metadata,
             mint_to_address: address,
         });
@@ -95,6 +97,7 @@ const Loader = ({}) => {
                         SetIsLoading(false)
                         console.log('Status:', json.response);
                         console.log('Transaction hash:', json.transaction_hash);
+                        setTxHash(json.transaction_hash);
                         console.log('Transaction url:', json.transaction_external_url);
                         SetExternalUrl(json.transaction_external_url);
                         console.log(response);
@@ -111,10 +114,32 @@ const Loader = ({}) => {
             });
       }
 
+      function fetch_id() {
+        fetch("https://api.nftport.xyz/v0/mints/"+txHash+"?chain=polygon", {
+          "method": "GET",
+          "headers": {
+            "Content-Type": "application/json",
+            Authorization: process.env.NFTPORT_KEY,
+          }
+        })
+        .then(response => {
+          return response.json().then(function (json) {
+            console.log(json.response);
+            return "https://opensea.io/assets/"+json.response.contract_address+"/"+json.response.token_id;
+          })
+
+        })
+        .catch(err => {
+          console.error(err);
+        });
+      }
+
       async function run() {
         const ipfs_url = await main();
         const meta_url = await upload_meta(name, desc, ipfs_url);
-        await mint_with_meta(meta_url, address);
+        mint_with_meta(meta_url, address);
+        const os_url = fetch_id();
+        console.log('OpenSea URL: ', os_url);
       }
     run();
     }
@@ -137,7 +162,7 @@ const Loader = ({}) => {
         </li>
         <li>
           <form target="_blank">
-          <button id="result_os" formAction='https://opensea.io/account'>⛴ See your NFT on Opensea</button>
+          <button id="result_os" formAction={oSLink}>⛴ See your NFT on Opensea</button>
           </form>
         </li>
       </ul>
