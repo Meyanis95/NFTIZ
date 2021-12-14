@@ -74,7 +74,7 @@ const Loader = ({}) => {
         return result_up;
       }
 
-      function mint_with_meta(metadata, address) {
+      async function mint_with_meta(metadata, address) {
         const data = JSON.stringify({
             chain: 'rinkeby',
             contract_address: '0xE5901EC65DC830e54b98Ff6097afA70eD2Ab4169',
@@ -82,7 +82,7 @@ const Loader = ({}) => {
             mint_to_address: address,
         });
 
-        fetch('https://api.nftport.xyz/v0/mints/customizable', {
+        const result_mint = await fetch('https://api.nftport.xyz/v0/mints/customizable', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -90,32 +90,34 @@ const Loader = ({}) => {
             },
             body: data,
         })
-            .then((response) => {
-                return response.json().then(function (json) {
-                    if (json.response ===  'OK') {
-                        console.log('NFT minted!')
-                        SetIsLoading(false)
-                        console.log('Status:', json.response);
-                        console.log('Transaction hash:', json.transaction_hash);
-                        setTxHash(json.transaction_hash);
-                        console.log('Transaction url:', json.transaction_external_url);
-                        SetExternalUrl(json.transaction_external_url);
-                        console.log(response);
-                    }
-                    else if (json.response === 'NOK') {
-                      SetIsLoading(false)
-                      SetIsError(true)
-                      SetErrorType(json.error)
-                    }
-                });
-            })
-            .catch((err) => {
-                throw(err);
+        .then((response) => {
+            return response.json().then(function (json) {
+                if (json.response ===  'OK') {
+                    console.log('NFT minted!')
+                    SetIsLoading(false)
+                    console.log('Status:', json.response);
+                    console.log('Transaction hash:', json.transaction_hash);
+                    setTxHash(json.transaction_hash);
+                    console.log('Transaction url:', json.transaction_external_url);
+                    SetExternalUrl(json.transaction_external_url);
+                    console.log(response);
+                    return json.transaction_hash;
+                }
+                else if (json.response === 'NOK') {
+                  SetIsLoading(false)
+                  SetIsError(true)
+                  SetErrorType(json.error)
+                }
             });
+        })
+        .catch((err) => {
+            throw(err);
+        });
+        return result_mint;
       }
 
-      function fetch_id() {
-        fetch("https://api.nftport.xyz/v0/mints/"+txHash+"?chain=polygon", {
+      function fetch_id(tx_hash) {
+        fetch("https://api.nftport.xyz/v0/mints/"+tx_hash+"?chain=rinkeby", {
           "method": "GET",
           "headers": {
             "Content-Type": "application/json",
@@ -125,7 +127,8 @@ const Loader = ({}) => {
         .then(response => {
           return response.json().then(function (json) {
             console.log(json.response);
-            return "https://opensea.io/assets/"+json.response.contract_address+"/"+json.response.token_id;
+            console.log(json.token_id)
+            setOSLink("https://testnets.opensea.io/assets/0xE5901EC65DC830e54b98Ff6097afA70eD2Ab4169/"+json.token_id);
           })
 
         })
@@ -137,11 +140,13 @@ const Loader = ({}) => {
       async function run() {
         const ipfs_url = await main();
         const meta_url = await upload_meta(name, desc, ipfs_url);
-        mint_with_meta(meta_url, address);
-        const os_url = fetch_id();
-        console.log('OpenSea URL: ', os_url);
+        const tx_hash = await mint_with_meta(meta_url, address);
+        console.log(tx_hash);
+        setTimeout(() => {
+          fetch_id(tx_hash);
+        }, 15000);
       }
-    run();
+      run();
     }
   }
 
@@ -150,17 +155,17 @@ const Loader = ({}) => {
       <div>
       <h3 className="v2_26">NFT MINTED ✅</h3>
       <ul className="fullclick">
-        <li>
+        <li key="uniqueId1">
           <form target="_blank">
           <button id="result_ipfs" formAction={ipfsUrl}>💾 See your image stored on IPFS</button>
           </form>
         </li>
-        <li>
+        <li key="uniqueId2">
           <form target="_blank">
           <button id="result_etherscan" formAction={externalUrl}>📊 See your transaction on etherscan</button>
           </form>
         </li>
-        <li>
+        <li key="uniqueId3">
           <form target="_blank">
           <button id="result_os" formAction={oSLink}>⛴ See your NFT on Opensea</button>
           </form>
