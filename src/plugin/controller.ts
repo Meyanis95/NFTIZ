@@ -15,7 +15,8 @@ figma.ui.onmessage = (msg) => {
                 else {
                     const bytes = await node.exportAsync();
     
-                    figma.showUI(__uiFiles__.ui_second)
+                    figma.showUI(__uiFiles__.ui_second);
+                    figma.ui.resize(330,450);
                     // This is how figma responds back to the ui
                     figma.ui.postMessage({
                         type: 'run',
