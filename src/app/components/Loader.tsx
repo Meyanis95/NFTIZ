@@ -9,7 +9,6 @@ const Loader = ({}) => {
   const [isLoading, SetIsLoading] = useState(true);
   const [isError, SetIsError] = useState(false);
   const [errorType, SetErrorType] = useState('');
-  const [txHash, setTxHash] = useState('');
   const [oSLink, setOSLink] = useState('https://opensea.io/');
 
   function Spinner() {
@@ -52,7 +51,7 @@ const Loader = ({}) => {
       async function upload_meta(name, desc, ipfs_url) {
         var url = 'https://api.nftport.xyz/v0/metadata';
         const data_up = JSON.stringify({
-            chain: 'rinkeby',
+            chain: 'polygon',
             name: name,
             description: desc,
             file_url: ipfs_url,
@@ -76,8 +75,8 @@ const Loader = ({}) => {
 
       async function mint_with_meta(metadata, address) {
         const data = JSON.stringify({
-            chain: 'rinkeby',
-            contract_address: '0xE5901EC65DC830e54b98Ff6097afA70eD2Ab4169',
+            chain: 'polygon',
+            contract_address: '0x7fc96cec611171f27c233f70128d04dd66c7a8c8',
             metadata_uri: metadata,
             mint_to_address: address,
         });
@@ -97,7 +96,6 @@ const Loader = ({}) => {
                     SetIsLoading(false)
                     console.log('Status:', json.response);
                     console.log('Transaction hash:', json.transaction_hash);
-                    setTxHash(json.transaction_hash);
                     console.log('Transaction url:', json.transaction_external_url);
                     SetExternalUrl(json.transaction_external_url);
                     console.log(response);
@@ -117,7 +115,7 @@ const Loader = ({}) => {
       }
 
       function fetch_id(tx_hash) {
-        fetch("https://api.nftport.xyz/v0/mints/"+tx_hash+"?chain=rinkeby", {
+        fetch("https://api.nftport.xyz/v0/mints/"+tx_hash+"?chain=polygon", {
           "method": "GET",
           "headers": {
             "Content-Type": "application/json",
@@ -128,7 +126,7 @@ const Loader = ({}) => {
           return response.json().then(function (json) {
             console.log(json.response);
             console.log(json.token_id)
-            setOSLink("https://testnets.opensea.io/assets/0xE5901EC65DC830e54b98Ff6097afA70eD2Ab4169/"+json.token_id);
+            setOSLink("https://opensea.io/assets/matic/0x7fc96cec611171f27c233f70128d04dd66c7a8c8/"+json.token_id);
           })
 
         })
@@ -154,6 +152,7 @@ const Loader = ({}) => {
     return (
       <div>
       <h3 className="v2_26">NFT MINTED ✅</h3>
+      <p className="v2_28">Opensea can be a bit long to load the data, it can take 5 to 10 minutes</p>
       <ul className="fullclick">
         <li key="uniqueId1">
           <form target="_blank">
@@ -162,7 +161,7 @@ const Loader = ({}) => {
         </li>
         <li key="uniqueId2">
           <form target="_blank">
-          <button id="result_etherscan" formAction={externalUrl}>📊 See your transaction on etherscan</button>
+          <button id="result_etherscan" formAction={externalUrl}>📊 See your transaction on polygonscan</button>
           </form>
         </li>
         <li key="uniqueId3">
