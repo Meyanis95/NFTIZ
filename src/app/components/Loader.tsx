@@ -138,7 +138,6 @@ const Loader = ({}) => {
         const ipfs_url = await main();
         const meta_url = await upload_meta(name, desc, ipfs_url);
         const tx_hash = await mint_with_meta(meta_url, address);
-        console.log(tx_hash);
         setTimeout(() => {
           fetch_id(tx_hash);
         }, 15000);
